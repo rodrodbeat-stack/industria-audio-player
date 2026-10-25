@@ -1,0 +1,13 @@
+NEURA // CYBER CHAOS — FIX DE PERSISTENCIA DE AUDIO
+
+Este parche hace que la web consulte Supabase al cargar y reconstruya la biblioteca con las canciones que tienen status='published'.
+
+IMPORTANTE: las canciones recién subidas se guardan con status='pending' por seguridad y moderación. No aparecerán en la biblioteca global después de recargar hasta que un administrador las apruebe y cambie su estado a 'published'. Las pistas pendientes solo se mantienen visibles en la sesión en la que se subieron.
+
+1. Conserva tu community-config.js actual con tu URL y clave anon/publicable.
+2. Reemplaza app.js por el de este ZIP.
+3. Sube los archivos al repositorio y espera a que GitHub Pages publique.
+4. Para comprobar el estado, ejecuta REPARAR_BIBLIOTECA_AUDIO.sql en Supabase SQL Editor.
+5. Publica únicamente canciones que tengas derecho a compartir y que hayan sido revisadas.
+
+No pongas la service_role key en archivos del navegador.

@@ -22,6 +22,31 @@
     $('libraryCount').textContent=`${tracks.length+photos.length} ARCHIVOS`;
     $('trackList').innerHTML=filtered.length?filtered.map(t=>`<div class="track-row ${tracks[currentIndex]?.id===t.id?'selected':''}" data-id="${safe(t.id)}"><span class="track-play">▶</span><div><b>${safe(t.title)}</b><small>${safe(t.artist)} · ${safe(t.genre)}</small></div><span class="genre">${t.global?'GLOBAL':'LOCAL'}</span></div>`).join(''):'<div class="empty-state">NO SE ENCONTRARON TEMAS<small>PRUEBA OTRA BÚSQUEDA O SUBE UNA PISTA</small></div>';
   }
+  async function loadPublishedTracks() {
+    if (!supabase) return;
+    $('trackStatus').textContent = 'Sincronizando biblioteca global…';
+    try {
+      const { data, error } = await supabase
+        .from('tracks')
+        .select('id,title,artist,genre,description,audio_path,audio_url,created_at,status')
+        .eq('status', 'published')
+        .order('created_at', { ascending: false });
+      if (error) throw error;
+      const remote = (data || []).map(row => ({
+        id: row.id, title: row.title, artist: row.artist, genre: row.genre || 'Experimental',
+        description: row.description || '', url: row.audio_url, global: true, created_at: row.created_at
+      }));
+      // Keep local-session tracks at the front; replace prior global copies with fresh DB data.
+      const local = tracks.filter(t => !t.global);
+      tracks.splice(0, tracks.length, ...local, ...remote);
+      if (currentIndex >= tracks.length) currentIndex = -1;
+      renderTracks();
+      $('trackStatus').textContent = `Biblioteca sincronizada: ${remote.length} canción(es) publicadas.`;
+    } catch (err) {
+      console.error('NEURA loadPublishedTracks:', err);
+      $('trackStatus').textContent = 'No se pudo sincronizar la biblioteca: ' + (err.message || 'revisa permisos SELECT de tracks.');
+    }
+  }
   function setPlaying(index, autoplay=true) {
     if(index<0||index>=tracks.length)return; currentIndex=index; const t=tracks[index];
     audio.src=t.url; $('playerTitle').textContent=t.title; $('playerArtist').textContent=t.artist; $('trackTitleInput').value=t.title; $('miniCover').src=t.cover||'assets/predator-cover.jpg';
@@ -43,7 +68,7 @@
         const {error:upErr}=await supabase.storage.from(cfg.audioBucket||'community-audio').upload(path,file,{contentType:file.type||'audio/mpeg',upsert:false}); if(upErr)throw upErr;
         const {data:pub}=supabase.storage.from(cfg.audioBucket||'community-audio').getPublicUrl(path);
         const {error:dbErr}=await supabase.from('tracks').insert({artist,title,genre,description,audio_path:path,audio_url:pub.publicUrl,status:'pending'}); if(dbErr)throw dbErr;
-        track.global=true; $('trackStatus').textContent='Tema enviado a Supabase para revisión. Queda pendiente de aprobación antes de publicarse globalmente.';
+        track.global=false; track.pending=true; $('trackStatus').textContent='Archivo guardado en Supabase. Estado: pendiente de aprobación; aparecerá en la biblioteca global después de publicarse.';
       }catch(err){console.error(err);$('trackStatus').textContent='Guardado solo en este dispositivo; Supabase devolvió un error: '+(err.message||'revisa configuración y políticas.');}
     } else {$('trackStatus').textContent='Tema cargado en esta sesión. Para publicarlo globalmente conectaremos Supabase en el siguiente paso.';}
     tracks.unshift(track); setPlaying(0,false); audio.src=track.url; renderTracks(); $('trackForm').reset();
@@ -67,4 +92,5 @@
   function updateClock(){const el=$('systemClock');if(el){el.textContent=new Date().toLocaleTimeString('es-CL',{hour12:false});}}
   updateClock();setInterval(updateClock,1000);
   renderTracks();renderPhotos();
+  loadPublishedTracks();
 })();
