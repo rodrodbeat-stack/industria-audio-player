@@ -1,33 +1,34 @@
-NEURA // NEURAL AUDIO 2050 — paquete inicial
-============================================
+NEURA // NEURAL AUDIO 2050 — CYBER CHAOS EDITION
+================================================
+
+ESTÉTICA
+- Portada cinematográfica 888 Digital Factory / Depredador.
+- HUD industrial, scanlines, interferencia/glitch, telemetría animada.
+- Negro profundo, rojo de alarma, cian eléctrico y acentos verde ácido.
+- Galería horizontal de álbumes, paneles de audio y centro de subida.
+- Diseño adaptable a móvil y escritorio.
 
 ARCHIVOS
-- index.html: página principal y menús.
-- styles.css: interfaz industrial/cyberpunk adaptable a móvil.
-- app.js: navegación, reproductor, búsqueda, importación de audio e imágenes.
-- community-config.js: configuración pendiente de Supabase.
-- supabase-schema-neura.sql: crea el bucket de imágenes y sus políticas demo.
-- assets/predator-cover.jpg: imagen cinematográfica de portada.
+- index.html: página y menús.
+- styles.css: interfaz Cyber Chaos.
+- app.js: búsqueda, reproductor, importación de audio, galería de fotos y conexión opcional a Supabase.
+- community-config.js: configuración de Supabase.
+- supabase-schema-neura.sql: configuración inicial para Storage de imágenes.
+- assets/predator-cover.jpg: portada principal.
 
 PRUEBA LOCAL
 1. Descomprime el ZIP.
-2. Abre index.html en el navegador o publica los archivos en GitHub Pages.
-3. En SUBIR CONTENIDO, elige un audio y pulsa CARGAR TEMA. Se podrá reproducir en la sesión actual.
-4. Elige una imagen y pulsa AÑADIR A LA GALERÍA. La imagen se verá en la galería durante la sesión.
+2. Publica los archivos en la raíz de tu repositorio GitHub Pages, conservando la carpeta assets.
+3. Abre la web y prueba los menús, el desplazamiento de álbumes, el reproductor y los formularios.
+4. Los audios e imágenes importados sin Supabase son locales a la sesión del navegador; no son visibles globalmente y pueden desaparecer al recargar.
 
-IMPORTANTE SOBRE LA CONEXIÓN GLOBAL
-La versión inicial funciona en modo local sin credenciales. Los archivos locales del navegador NO se publican a otros usuarios y los objetos locales desaparecen al cerrar/recargar la sesión.
-Para activar Supabase:
+CONECTAR SUPABASE (SIGUIENTE PASO)
 1. Abre community-config.js.
-2. Sustituye TU-PROYECTO y TU_CLAVE_PUBLICABLE_ANON por la URL del proyecto y la clave publicable (anon) de Supabase.
-   No pongas aquí la clave service_role ni ninguna clave secreta.
-3. En Supabase Storage, verifica que exista el bucket community-audio. El esquema previo supabase-schema.sql lo crea.
-4. En Supabase > SQL Editor, ejecuta supabase-schema-neura.sql para crear community-images.
-5. La tabla tracks debe existir según el esquema previo supabase-schema.sql.
-6. Publica los cambios y prueba un audio y una imagen pequeños.
+2. Sustituye TU-PROYECTO y TU_CLAVE_PUBLICABLE_ANON por la URL y la clave pública/anon de tu proyecto.
+3. Nunca pegues una clave service_role ni secretos en el frontend.
+4. Revisa el esquema SQL existente de tu proyecto antes de ejecutar cambios. La tabla tracks debe tener los campos que usa app.js (artist, title, genre, description, audio_path, audio_url, status). El bucket community-audio debe existir y permitir la operación de subida según tus políticas.
+5. Ejecuta supabase-schema-neura.sql para configurar el bucket de imágenes y sus políticas demo, revisándolas primero para ajustarlas a tu política de acceso.
+6. Los temas se insertan como pending para moderación; no se publican automáticamente como aprobados.
 
-MODERACIÓN
-Los temas subidos se insertan con estado pending y requieren aprobación antes de ser visibles globalmente. El código no permite publicar automáticamente una pista como aprobada.
-
-LIMITACIÓN DE ESTA ENTREGA
-La galería y la lista de reproducción son una primera versión funcional para probar el diseño, los menús y el reproductor. La carga a Supabase se habilita cuando se completan las credenciales y políticas. El siguiente paso será verificar la configuración de tu proyecto Supabase existente, sin compartir claves secretas en el chat.
+NOTA
+Esta edición mejora la interfaz visual; no conecta automáticamente Supabase ni reemplaza las políticas de seguridad del proyecto. La publicación global requiere credenciales y permisos correctos.

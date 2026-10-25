@@ -18,7 +18,7 @@
   function renderTracks() {
     const query=$('searchTracks').value.trim().toLowerCase(), genre=$('genreFilter').value;
     const filtered=tracks.filter(t=>(!query||`${t.title} ${t.artist} ${t.genre}`.toLowerCase().includes(query))&&(!genre||t.genre===genre));
-    $('trackCount').textContent=`${String(tracks.length).padStart(2,'0')} TEMAS`;
+    $('trackCount').textContent=`${String(tracks.length).padStart(2,'0')} TEMAS`; const telemetry=$('telemetryTracks'); if(telemetry) telemetry.innerHTML=`${String(tracks.length).padStart(2,'0')} <em>TRK</em>`;
     $('libraryCount').textContent=`${tracks.length+photos.length} ARCHIVOS`;
     $('trackList').innerHTML=filtered.length?filtered.map(t=>`<div class="track-row ${tracks[currentIndex]?.id===t.id?'selected':''}" data-id="${safe(t.id)}"><span class="track-play">▶</span><div><b>${safe(t.title)}</b><small>${safe(t.artist)} · ${safe(t.genre)}</small></div><span class="genre">${t.global?'GLOBAL':'LOCAL'}</span></div>`).join(''):'<div class="empty-state">NO SE ENCONTRARON TEMAS<small>PRUEBA OTRA BÚSQUEDA O SUBE UNA PISTA</small></div>';
   }
