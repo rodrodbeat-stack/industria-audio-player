@@ -1,157 +1,156 @@
 (() => {
-  const audio = document.getElementById("audioPlayer");
-  const filesInput = document.getElementById("audioFiles");
-  const playlist = document.getElementById("playlist");
-  const playBtn = document.getElementById("playBtn");
-  const seekBar = document.getElementById("seekBar");
-  const volumeBar = document.getElementById("volumeBar");
-  const visualizer = document.getElementById("visualizer");
-  const albumArt = document.getElementById("albumArt");
+  const audio = document.getElementById('audioPlayer');
+  const fileInput = document.getElementById('audioFiles');
+  const list = document.getElementById('playlistList');
+  const count = document.getElementById('trackCount');
+  const playBtn = document.getElementById('playButton');
+  const seek = document.getElementById('seekBar');
+  const volume = document.getElementById('volumeBar');
+  const title = document.getElementById('trackTitle');
+  const artist = document.getElementById('trackArtist');
+  const album = document.getElementById('trackAlbum');
+  const cover = document.getElementById('coverArt');
+  const state = document.getElementById('playState');
+  const telemetryState = document.getElementById('telemetryState');
+  const logPlayback = document.getElementById('logPlayback');
+  const audioLight = document.getElementById('audioLight');
+  const bars = document.getElementById('visualizer');
+  const currentTime = document.getElementById('currentTime');
+  const duration = document.getElementById('duration');
   const tracks = [];
-  let currentIndex = -1;
-  let objectUrls = [];
-  const $ = id => document.getElementById(id);
+  let current = -1, shuffle = false, repeat = false, objectUrl = null;
 
-  for (let i = 0; i < 52; i++) {
-    const bar = document.createElement("span");
-    bar.style.height = `${4 + Math.random() * 12}px`;
-    visualizer.appendChild(bar);
+  // Animated industrial frequency bars (visual decoration; no microphone access).
+  for (let i = 0; i < 44; i++) {
+    const bar = document.createElement('i');
+    bar.className = 'bar';
+    bars.appendChild(bar);
   }
-
-  function formatTime(seconds) {
-    if (!Number.isFinite(seconds) || seconds < 0) return "00:00";
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+  const barNodes = [...bars.children];
+  let animation = 0;
+  function animateBars() {
+    animation++;
+    barNodes.forEach((bar, i) => {
+      const height = audio.paused ? 4 + ((i * 7) % 9) : 12 + Math.abs(Math.sin(animation * .13 + i * .52)) * 72;
+      bar.style.height = `${height}%`;
+    });
+    if (!audio.paused) {
+      document.getElementById('intensity').textContent = `${Math.round(55 + Math.abs(Math.sin(animation / 17)) * 43)}%`;
+      document.getElementById('signalMeter').style.width = `${55 + Math.abs(Math.sin(animation / 17)) * 43}%`;
+      document.getElementById('signalPercent').textContent = document.getElementById('intensity').textContent;
+      document.getElementById('bpm').textContent = `${Math.round(90 + Math.abs(Math.sin(animation / 50)) * 55)}`;
+    }
+    requestAnimationFrame(animateBars);
   }
+  animateBars();
 
-  function safeTitle(name) {
-    return name.replace(/\.[^.]+$/, "").replace(/[_-]+/g, " ").trim() || "Archivo desconocido";
+  function fmt(seconds) {
+    if (!Number.isFinite(seconds)) return '00:00';
+    const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
   }
-
-  function renderPlaylist() {
-    $("trackCount").textContent = `${String(tracks.length).padStart(2, "0")} ARCHIVOS`;
+  function updateStatus(playing) {
+    const text = playing ? 'REPRODUCIENDO' : (current >= 0 ? 'EN PAUSA' : 'EN ESPERA');
+    state.textContent = text;
+    telemetryState.textContent = playing ? 'ACTIVO' : 'STANDBY';
+    logPlayback.textContent = playing ? 'ACTIVO' : 'PAUSA';
+    audioLight.classList.toggle('off', !playing);
+    playBtn.textContent = playing ? 'Ⅱ' : '▶';
+    playBtn.setAttribute('aria-label', playing ? 'Pausar' : 'Reproducir');
+    bars.classList.toggle('idle', !playing);
+  }
+  function renderList() {
+    count.textContent = `${String(tracks.length).padStart(2, '0')} TEMAS`;
+    document.getElementById('logTracks').textContent = String(tracks.length).padStart(2, '0');
     if (!tracks.length) {
-      playlist.innerHTML = '<div class="empty-state"><span>▧</span><strong>NO HAY ARCHIVOS</strong><small>Carga MP3, WAV, OGG o M4A para comenzar.</small></div>';
+      list.innerHTML = '<div class="empty-state">NO HAY ARCHIVOS CARGADOS<br><small>IMPORTA AUDIO PARA INICIAR LA SEÑAL</small></div>';
       return;
     }
-    playlist.innerHTML = "";
+    list.innerHTML = '';
     tracks.forEach((track, index) => {
-      const row = document.createElement("button");
-      row.type = "button";
-      row.className = `track-item${index === currentIndex ? " selected" : ""}`;
-      row.style.width = "100%";
-      row.style.textAlign = "left";
-      row.innerHTML = `<span class="track-thumb">${index === currentIndex && !audio.paused ? "♫" : "N"}</span>
-        <span class="track-details"><strong></strong><small></small></span><span class="track-duration">${track.duration || "--:--"}</span>`;
-      row.querySelector("strong").textContent = track.title;
-      row.querySelector("small").textContent = `NR-${String(index + 1).padStart(3, "0")} // LOCAL`;
-      row.addEventListener("click", () => loadTrack(index, true));
-      playlist.appendChild(row);
+      const button = document.createElement('button');
+      button.className = `track-row${index === current ? ' selected' : ''}`;
+      button.type = 'button';
+      button.innerHTML = `<span class="track-thumb" style="display:grid;place-items:center;background:linear-gradient(135deg,#182e2c,#17060b);color:#ff263e;font-family:Orbitron,sans-serif">♫</span><span class="track-text"><strong></strong><small>NEURA // ARCHIVO LOCAL</small></span><span class="track-length">${track.duration ? fmt(track.duration) : '--:--'}</span>`;
+      button.querySelector('strong').textContent = track.name.replace(/\.[^.]+$/, '');
+      button.addEventListener('click', () => loadTrack(index, true));
+      list.appendChild(button);
     });
   }
-
-  function updateTelemetry() {
-    const playing = !audio.paused && !audio.ended;
-    $("signalState").textContent = playing ? "TRANSMITIENDO" : (currentIndex >= 0 ? "ARCHIVO EN PAUSA" : "EN ESPERA");
-    $("playState").textContent = playing ? "CHANNEL TRANSMITTING" : "CHANNEL STANDBY";
-    $("signalLevel").innerHTML = playing ? `-${Math.round(7 + audio.volume * 24)} <small>dB</small>` : "-- <small>dB</small>";
-    $("freq").innerHTML = playing ? `${(80 + audio.currentTime * 3.7).toFixed(1)} <small>Hz</small>` : "000.0 <small>Hz</small>";
-    $("meterFill").style.width = playing ? `${Math.max(7, audio.volume * (45 + Math.sin(audio.currentTime * 7) * 20))}%` : "0%";
-    visualizer.classList.toggle("active", playing);
-    albumArt.classList.toggle("playing", playing);
-    playBtn.textContent = playing ? "Ⅱ" : "▶";
-    playBtn.setAttribute("aria-label", playing ? "Pausar" : "Reproducir");
-  }
-
-  function loadTrack(index, autoplay = false) {
+  function loadTrack(index, autoplay) {
     if (index < 0 || index >= tracks.length) return;
-    currentIndex = index;
-    const track = tracks[index];
-    audio.src = track.url;
-    $("trackTitle").textContent = track.title;
-    $("trackArtist").textContent = track.artist || "Archivo local recuperado";
-    $("trackCode").textContent = `NR-${String(index + 1).padStart(3, "0")}`;
-    $("currentTime").textContent = "00:00";
-    $("duration").textContent = track.duration || "00:00";
-    seekBar.value = 0;
-    renderPlaylist();
-    updateTelemetry();
-    if (autoplay) audio.play().catch(() => {
-      $("playState").textContent = "PULSA PLAY PARA INICIAR";
-    });
+    current = index;
+    if (objectUrl) URL.revokeObjectURL(objectUrl);
+    objectUrl = URL.createObjectURL(tracks[index].file);
+    audio.src = objectUrl;
+    title.textContent = tracks[index].name.replace(/\.[^.]+$/, '').toUpperCase();
+    artist.textContent = 'NEURA // 888 DIGITAL FACTORY';
+    album.textContent = 'ARCHIVO LOCAL';
+    cover.src = 'assets/predator-cover.jpg';
+    seek.value = 0;
+    currentTime.textContent = '00:00';
+    duration.textContent = '00:00';
+    renderList();
+    if (autoplay) audio.play().then(() => updateStatus(true)).catch(() => updateStatus(false));
+    else updateStatus(false);
   }
-
-  filesInput.addEventListener("change", () => {
-    const selected = Array.from(filesInput.files || []);
-    const valid = selected.filter(file => file.type.startsWith("audio/") || /\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(file.name));
-    if (!valid.length) {
-      alert("Selecciona archivos de audio MP3, WAV, OGG, M4A, AAC o FLAC.");
-      filesInput.value = "";
-      return;
-    }
-    valid.forEach(file => {
-      const url = URL.createObjectURL(file);
-      objectUrls.push(url);
-      const track = { title: safeTitle(file.name), artist: "Archivo local recuperado", url, duration: "--:--", file };
-      tracks.push(track);
-      const probe = new Audio();
-      probe.preload = "metadata";
-      probe.src = url;
-      probe.addEventListener("loadedmetadata", () => {
-        track.duration = formatTime(probe.duration);
-        renderPlaylist();
-        if (tracks.indexOf(track) === currentIndex) $("duration").textContent = track.duration;
-      }, { once: true });
-    });
-    renderPlaylist();
-    if (currentIndex === -1 && tracks.length) loadTrack(0, false);
-    filesInput.value = "";
+  fileInput.addEventListener('change', () => {
+    const files = [...fileInput.files].filter(file => file.type.startsWith('audio/') || /\.(mp3|wav|ogg|m4a|flac|aac)$/i.test(file.name));
+    if (!files.length) return;
+    files.forEach(file => tracks.push({ file, name: file.name, duration: 0 }));
+    renderList();
+    if (current < 0) loadTrack(0, false);
+    fileInput.value = '';
   });
-
-  playBtn.addEventListener("click", () => {
-    if (currentIndex === -1 && tracks.length) loadTrack(0, true);
-    else if (currentIndex >= 0) {
-      if (audio.paused) audio.play().catch(() => {});
-      else audio.pause();
-    } else {
-      filesInput.click();
-    }
+  audio.addEventListener('loadedmetadata', () => {
+    if (current >= 0) tracks[current].duration = audio.duration;
+    duration.textContent = fmt(audio.duration);
+    renderList();
   });
-  $("prevBtn").addEventListener("click", () => {
-    if (tracks.length) loadTrack((currentIndex - 1 + tracks.length) % tracks.length, true);
+  audio.addEventListener('timeupdate', () => {
+    currentTime.textContent = fmt(audio.currentTime);
+    duration.textContent = fmt(audio.duration);
+    if (Number.isFinite(audio.duration) && audio.duration > 0) seek.value = Math.round(audio.currentTime / audio.duration * 1000);
   });
-  $("nextBtn").addEventListener("click", () => {
-    if (tracks.length) loadTrack((currentIndex + 1) % tracks.length, true);
+  audio.addEventListener('play', () => updateStatus(true));
+  audio.addEventListener('pause', () => updateStatus(false));
+  audio.addEventListener('ended', () => {
+    if (repeat) { audio.currentTime = 0; audio.play(); return; }
+    nextTrack();
   });
-  audio.addEventListener("timeupdate", () => {
-    $("currentTime").textContent = formatTime(audio.currentTime);
-    if (Number.isFinite(audio.duration) && audio.duration > 0) seekBar.value = String(audio.currentTime / audio.duration * 1000);
-    updateTelemetry();
+  playBtn.addEventListener('click', () => {
+    if (current < 0 && tracks.length) loadTrack(0, true);
+    else if (current < 0) { fileInput.click(); }
+    else if (audio.paused) audio.play().catch(() => updateStatus(false));
+    else audio.pause();
   });
-  audio.addEventListener("loadedmetadata", () => {
-    $("duration").textContent = formatTime(audio.duration);
-    if (currentIndex >= 0) tracks[currentIndex].duration = formatTime(audio.duration);
-    renderPlaylist();
+  function nextTrack() {
+    if (!tracks.length) return;
+    let next = current + 1;
+    if (shuffle && tracks.length > 1) {
+      do { next = Math.floor(Math.random() * tracks.length); } while (next === current);
+    } else if (next >= tracks.length) next = 0;
+    loadTrack(next, true);
+  }
+  function previousTrack() {
+    if (!tracks.length) return;
+    if (audio.currentTime > 3) { audio.currentTime = 0; return; }
+    loadTrack((current - 1 + tracks.length) % tracks.length, true);
+  }
+  document.getElementById('nextButton').addEventListener('click', nextTrack);
+  document.getElementById('previousButton').addEventListener('click', previousTrack);
+  document.getElementById('shuffleButton').addEventListener('click', event => {
+    shuffle = !shuffle; event.currentTarget.classList.toggle('active', shuffle);
   });
-  audio.addEventListener("play", () => { updateTelemetry(); renderPlaylist(); });
-  audio.addEventListener("pause", () => { updateTelemetry(); renderPlaylist(); });
-  audio.addEventListener("ended", () => {
-    if (tracks.length > 1) loadTrack((currentIndex + 1) % tracks.length, true);
-    else updateTelemetry();
+  document.getElementById('repeatButton').addEventListener('click', event => {
+    repeat = !repeat; event.currentTarget.classList.toggle('active', repeat);
   });
-  seekBar.addEventListener("input", () => {
-    if (Number.isFinite(audio.duration) && audio.duration > 0) audio.currentTime = (Number(seekBar.value) / 1000) * audio.duration;
+  seek.addEventListener('input', () => {
+    if (Number.isFinite(audio.duration) && audio.duration > 0) audio.currentTime = Number(seek.value) / 1000 * audio.duration;
   });
-  volumeBar.addEventListener("input", () => { audio.volume = Number(volumeBar.value); updateTelemetry(); });
-  audio.volume = Number(volumeBar.value);
-
-  $("themeToggle").addEventListener("click", () => {
-    document.body.classList.toggle("light-mode");
-    $("themeToggle").textContent = document.body.classList.contains("light-mode") ? "MODO OSCURO" : "MODO NOCHE";
-  });
-
-  window.addEventListener("beforeunload", () => objectUrls.forEach(url => URL.revokeObjectURL(url)));
-  renderPlaylist();
-  updateTelemetry();
+  volume.addEventListener('input', () => audio.volume = Number(volume.value));
+  audio.volume = Number(volume.value);
+  renderList();
+  updateStatus(false);
 })();
