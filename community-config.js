@@ -4,8 +4,8 @@
    3) Luego ejecuta supabase-schema-neura.sql en el SQL Editor de Supabase.
 */
 window.NEURA_CONFIG = {
-  supabaseUrl: "https://qeuaftopjkfanglgojyb.supabase.co",
-  supabaseAnonKey: "sb_publishable_jgVlZ4y8sdUZyRVeY3mDuw_bX7U2GlP",
+  supabaseUrl: "https://TU-PROYECTO.supabase.co",
+  supabaseAnonKey: "TU_CLAVE_PUBLICABLE_ANON",
   audioBucket: "community-audio",
   imageBucket: "community-images"
 };
