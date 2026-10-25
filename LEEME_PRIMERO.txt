@@ -1,34 +1,35 @@
-NEURA // NEURAL AUDIO 2050 — CYBER CHAOS EDITION
-================================================
+NEURA // CYBER CHAOS EXTREME 2050
+888 DIGITAL-FACTORY — Neural Audio 2050
 
-ESTÉTICA
-- Portada cinematográfica 888 Digital Factory / Depredador.
-- HUD industrial, scanlines, interferencia/glitch, telemetría animada.
-- Negro profundo, rojo de alarma, cian eléctrico y acentos verde ácido.
-- Galería horizontal de álbumes, paneles de audio y centro de subida.
-- Diseño adaptable a móvil y escritorio.
+ESTA VERSIÓN PRIORIZA UNA IDENTIDAD VISUAL MÁS DETALLADA Y DISRUPTIVA:
+- Portada cinematográfica con la imagen industrial/cyborg.
+- Interfaz táctica con bordes angulares, retículas, telemetría y señal en movimiento.
+- Paleta negra, rojo alarma, cian eléctrico y verde ácido.
+- Navegación lateral, barra superior, ticker de transmisión y reloj de sistema.
+- Galería horizontal de álbumes con portadas estilizadas.
+- Búsqueda y filtro de canciones.
+- Reproductor fijo con play/pause, anterior/siguiente, progreso y volumen.
+- Formularios para importar audio y fotografías.
+- Adaptación a móvil y escritorio.
 
 ARCHIVOS
-- index.html: página y menús.
-- styles.css: interfaz Cyber Chaos.
-- app.js: búsqueda, reproductor, importación de audio, galería de fotos y conexión opcional a Supabase.
-- community-config.js: configuración de Supabase.
-- supabase-schema-neura.sql: configuración inicial para Storage de imágenes.
-- assets/predator-cover.jpg: portada principal.
+index.html                 Estructura de la web
+styles.css                 Sistema visual Cyber Chaos Extreme
+app.js                     Reproductor, búsqueda, subida local y galería
+community-config.js        Configuración pública del cliente Supabase
+supabase-schema-neura.sql  Bucket/políticas de imágenes de demo
+assets/predator-cover.jpg  Portada cinematográfica
 
 PRUEBA LOCAL
-1. Descomprime el ZIP.
-2. Publica los archivos en la raíz de tu repositorio GitHub Pages, conservando la carpeta assets.
-3. Abre la web y prueba los menús, el desplazamiento de álbumes, el reproductor y los formularios.
-4. Los audios e imágenes importados sin Supabase son locales a la sesión del navegador; no son visibles globalmente y pueden desaparecer al recargar.
+1. Descomprime el ZIP completo; no saques index.html de su carpeta.
+2. Abre index.html en un navegador moderno.
+3. Ve a SUBIR CONTENIDO para probar la importación de audio y las fotos.
+4. La música importada localmente está disponible durante la sesión del navegador.
 
-CONECTAR SUPABASE (SIGUIENTE PASO)
-1. Abre community-config.js.
-2. Sustituye TU-PROYECTO y TU_CLAVE_PUBLICABLE_ANON por la URL y la clave pública/anon de tu proyecto.
-3. Nunca pegues una clave service_role ni secretos en el frontend.
-4. Revisa el esquema SQL existente de tu proyecto antes de ejecutar cambios. La tabla tracks debe tener los campos que usa app.js (artist, title, genre, description, audio_path, audio_url, status). El bucket community-audio debe existir y permitir la operación de subida según tus políticas.
-5. Ejecuta supabase-schema-neura.sql para configurar el bucket de imágenes y sus políticas demo, revisándolas primero para ajustarlas a tu política de acceso.
-6. Los temas se insertan como pending para moderación; no se publican automáticamente como aprobados.
+IMPORTANTE SOBRE SUPABASE
+La conexión global NO está activada todavía: community-config.js contiene valores de ejemplo.
+Para conectar el proyecto existente, reemplaza SUPABASE_URL y SUPABASE_ANON_KEY por la URL y la clave publicable (anon) de tu proyecto Supabase. Nunca pongas una service_role key en el navegador.
+Después revisaremos el esquema real de tus tablas y las políticas RLS antes de habilitar la publicación global. No ejecutes políticas nuevas a ciegas si ya tienes tablas/policies existentes.
 
 NOTA
-Esta edición mejora la interfaz visual; no conecta automáticamente Supabase ni reemplaza las políticas de seguridad del proyecto. La publicación global requiere credenciales y permisos correctos.
+Las tarjetas de álbum de muestra son diseños visuales de demostración. Las canciones e imágenes que importes se muestran localmente hasta que completemos la conexión y persistencia global de Supabase.
