@@ -1,0 +1,33 @@
+NEURA // NEURAL AUDIO 2050 — paquete inicial
+============================================
+
+ARCHIVOS
+- index.html: página principal y menús.
+- styles.css: interfaz industrial/cyberpunk adaptable a móvil.
+- app.js: navegación, reproductor, búsqueda, importación de audio e imágenes.
+- community-config.js: configuración pendiente de Supabase.
+- supabase-schema-neura.sql: crea el bucket de imágenes y sus políticas demo.
+- assets/predator-cover.jpg: imagen cinematográfica de portada.
+
+PRUEBA LOCAL
+1. Descomprime el ZIP.
+2. Abre index.html en el navegador o publica los archivos en GitHub Pages.
+3. En SUBIR CONTENIDO, elige un audio y pulsa CARGAR TEMA. Se podrá reproducir en la sesión actual.
+4. Elige una imagen y pulsa AÑADIR A LA GALERÍA. La imagen se verá en la galería durante la sesión.
+
+IMPORTANTE SOBRE LA CONEXIÓN GLOBAL
+La versión inicial funciona en modo local sin credenciales. Los archivos locales del navegador NO se publican a otros usuarios y los objetos locales desaparecen al cerrar/recargar la sesión.
+Para activar Supabase:
+1. Abre community-config.js.
+2. Sustituye TU-PROYECTO y TU_CLAVE_PUBLICABLE_ANON por la URL del proyecto y la clave publicable (anon) de Supabase.
+   No pongas aquí la clave service_role ni ninguna clave secreta.
+3. En Supabase Storage, verifica que exista el bucket community-audio. El esquema previo supabase-schema.sql lo crea.
+4. En Supabase > SQL Editor, ejecuta supabase-schema-neura.sql para crear community-images.
+5. La tabla tracks debe existir según el esquema previo supabase-schema.sql.
+6. Publica los cambios y prueba un audio y una imagen pequeños.
+
+MODERACIÓN
+Los temas subidos se insertan con estado pending y requieren aprobación antes de ser visibles globalmente. El código no permite publicar automáticamente una pista como aprobada.
+
+LIMITACIÓN DE ESTA ENTREGA
+La galería y la lista de reproducción son una primera versión funcional para probar el diseño, los menús y el reproductor. La carga a Supabase se habilita cuando se completan las credenciales y políticas. El siguiente paso será verificar la configuración de tu proyecto Supabase existente, sin compartir claves secretas en el chat.
