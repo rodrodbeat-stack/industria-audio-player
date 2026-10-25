@@ -1,17 +1,17 @@
-NEURA // INDUSTRIAS OLVIDADAS — AUDIO PLAYER
+NEURA // INDUSTRIAS OLVIDADAS — AUDIO TERMINAL 2050
+888 DIGITAL FACTORY
 
-CONTENIDO
-- index.html: estructura de la web
-- styles.css: diseño futurista industrial
-- app.js: reproductor, playlist y visualizador
+Archivos:
+- index.html: estructura
+- styles.css: interfaz futurista y responsive
+- app.js: reproductor, playlist, visualizador y telemetría
+- assets/888-cyborg.jpg: tu arte 888 Digital Factory usado como fondo principal
+- assets/predator-cover.jpg: portada de Depredador para el reproductor
+- assets/industrial-city.png: ambiente de ciudad industrial
 
-CÓMO USAR
-1. Descomprime el ZIP.
-2. Abre index.html en un navegador moderno.
-3. Pulsa IMPORTAR AUDIO y elige uno o varios archivos de audio.
-4. Selecciona un tema en PLAYLIST y pulsa reproducir.
+Uso:
+1. Sube TODOS los archivos y la carpeta assets a la raíz de tu repositorio GitHub Pages.
+2. Abre index.html desde GitHub Pages.
+3. Pulsa IMPORTAR TEMAS y selecciona tus archivos de audio.
 
-IMPORTANTE
-Esta versión reproduce archivos seleccionados desde el dispositivo actual.
-No los sube a Supabase ni los comparte globalmente. Para publicar audio entre usuarios
-hay que conectar el reproductor con el proyecto Supabase, su bucket de Storage y la tabla tracks.
+Nota: esta versión reproduce audio local desde el dispositivo. No sincroniza los archivos entre usuarios ni se conecta a Supabase.

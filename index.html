@@ -1,133 +1,69 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#050709">
-  <meta name="description" content="NEURA — Industrias Olvidadas. Terminal de audio industrial de 888 Digital Factory.">
-  <title>NEURA // INDUSTRIAS OLVIDADAS</title>
-  <link rel="stylesheet" href="styles.css">
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#050707">
+<meta name="description" content="NEURA — Industrias Olvidadas. Terminal de audio 888 Digital Factory.">
+<title>NEURA // INDUSTRIAS OLVIDADAS — AUDIO TERMINAL</title>
+<link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <div class="scanlines" aria-hidden="true"></div>
-  <div class="ambient ambient-one" aria-hidden="true"></div>
-  <div class="ambient ambient-two" aria-hidden="true"></div>
+<div class="scanlines"></div><div class="vignette"></div>
+<header class="topbar">
+  <a class="brand" href="#inicio"><span class="brand-title">NE<span>U</span>RA</span><small>INDUSTRIAS OLVIDADAS</small></a>
+  <nav><a class="selected" href="#inicio">INICIO</a><a href="#archivo">EXPLORAR</a><a href="#playlist">ARCHIVO SONORO</a><a href="#sistema">SISTEMA</a></nav>
+  <div class="online"><i></i><b>SISTEMA ONLINE</b><small>NEURAL AUDIO // 2050</small></div>
+</header>
+<main id="inicio">
+<section class="hero">
+  <div class="hero-bg"></div><div class="hero-shade"></div>
+  <div class="hero-content">
+    <div class="kicker"><span class="pulse"></span> 888 DIGITAL FACTORY <span class="line"></span> TERMINAL 08.88</div>
+    <h1>INDUSTRIAS<br><em>OLVIDADAS</em></h1>
+    <p>SEÑALES SONORAS RECUPERADAS DEL FIN DE LA CIVILIZACIÓN.</p>
+    <div class="hero-tags"><span>INDUSTRIAL</span><span>DARK AMBIENT</span><span>CYBERPUNK</span><span>UNDERGROUND</span></div>
+    <a class="enter" href="#archivo">▶ INICIAR TRANSMISIÓN</a>
+  </div>
+  <div class="hero-scope"><div class="scope-ring"><i></i></div><small>SCAN // 88.8 MHz<br>OBJETO DETECTADO</small><b>NEURA SYSTEMS</b></div>
+  <div class="hero-bottom"><span>COORDENADAS: 33° S / ZONA INDUSTRIAL</span><span>SEÑAL: <b>ESTABLE</b></span><span>PROTOCOLO: AUDIO-2050</span></div>
+</section>
 
-  <header class="topbar">
-    <a class="brand" href="#inicio" aria-label="NEURA inicio">
-      <span class="brand-name">NEURA</span>
-      <span class="brand-sub">INDUSTRIAS OLVIDADAS</span>
-    </a>
-    <nav class="main-nav" aria-label="Navegación principal">
-      <a class="active" href="#inicio">INICIO</a>
-      <a href="#explorar">EXPLORAR</a>
-      <a href="#playlist">COMUNIDAD</a>
-      <a href="#sistema">SISTEMA</a>
-    </nav>
-    <div class="system-status"><i></i><span>SISTEMA ONLINE</span><small>NEURAL AUDIO 2050</small></div>
-  </header>
+<section class="dashboard" id="archivo">
+  <aside class="panel playlist-panel" id="playlist">
+    <div class="panel-head"><div><i>▤</i> ARCHIVO SONORO</div><span id="trackCount">00 TEMAS</span></div>
+    <div class="playlist-list" id="playlistList"><div class="empty">NO HAY ARCHIVOS EN MEMORIA<br><small>IMPORTA TUS TEMAS PARA ACTIVAR LA TERMINAL</small></div></div>
+    <label class="import-button">＋ IMPORTAR TEMAS<input id="audioFiles" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac" multiple></label>
+    <div class="side-note"><i></i> REPRODUCCIÓN LOCAL DISPONIBLE</div>
+  </aside>
 
-  <main id="inicio">
-    <section class="hero">
-      <div class="hero-copy">
-        <div class="eyebrow"><span class="live-dot"></span> TERMINAL DE AUDIO // SECTOR 08</div>
-        <h1>EL SONIDO<br><em>DE LAS RUINAS.</em></h1>
-        <p>Frecuencias recuperadas desde las industrias olvidadas.<br>Ruido, memoria y resistencia humana.</p>
-        <div class="hero-actions">
-          <a class="button button-primary" href="#explorar">▶ ENTRAR AL SISTEMA</a>
-          <a class="button button-ghost" href="#playlist">⌁ EXPLORAR ARCHIVOS</a>
-        </div>
+  <section class="center-column">
+    <div class="player-panel panel">
+      <div class="album-art"><img id="coverArt" src="assets/predator-cover.jpg" alt="Arte de portada Depredador"><div class="art-stamp">NEURA<br><b>ARCHIVE 08</b></div><div class="art-corner">CLASSIFIED</div></div>
+      <div class="track-detail">
+        <div class="red-kicker">/// TRANSMISIÓN ACTIVA <span id="playState">EN ESPERA</span></div>
+        <h2 id="trackTitle">INDUSTRIAS OLVIDADAS</h2><h3 id="trackArtist">NEURA // 888 DIGITAL FACTORY</h3>
+        <div class="metadata"><span>ÁLBUM <b id="trackAlbum">DEPREDADOR</b></span><span>GÉNERO <b>INDUSTRIAL / CYBERPUNK</b></span><span>FORMATO <b>LOCAL HI-FI</b></span></div>
+        <p class="description">Entre ruinas y concreto…<br>las máquinas aún recuerdan.<br>La humanidad fue un error.<br>Las industrias, un sueño olvidado.</p>
+        <div class="progress"><input id="seekBar" type="range" min="0" max="1000" value="0" aria-label="Posición"><div><span id="currentTime">00:00</span><span id="duration">00:00</span></div></div>
       </div>
-      <div class="hero-readout">
-        <span>COORDENADAS // 08.88</span>
-        <div class="radar"><i></i><b></b></div>
-        <small>SEÑAL DETECTADA<br>ORIGEN: DESCONOCIDO</small>
-      </div>
-    </section>
+    </div>
+    <div class="viz-panel panel"><div class="viz-head"><b>ANALIZADOR DE AUDIO</b><span>FFT / LIVE SPECTRUM</span></div><div id="visualizer" class="visualizer"></div><div class="freq-labels"><span>20 Hz</span><span>LOW FREQUENCY</span><span>HIGH FREQUENCY</span><span>20 kHz</span></div></div>
+    <div class="controls panel">
+      <button id="shuffleButton" title="Aleatorio" aria-label="Aleatorio">⤨</button><button id="previousButton" title="Anterior" aria-label="Anterior">|◀</button>
+      <button id="playButton" class="play-main" title="Reproducir" aria-label="Reproducir">▶</button><button id="nextButton" title="Siguiente" aria-label="Siguiente">▶|</button><button id="repeatButton" title="Repetir" aria-label="Repetir">↻</button>
+      <div class="volume"><span>VOL</span><input id="volumeBar" type="range" min="0" max="1" step=".01" value=".8"></div>
+    </div>
+  </section>
 
-    <section class="dashboard" id="explorar">
-      <aside class="panel playlist-panel" id="playlist">
-        <div class="panel-heading">
-          <div><span class="heading-icon">▤</span> ARCHIVO SONORO</div>
-          <span class="count" id="trackCount">00 TEMAS</span>
-        </div>
-        <div class="playlist-list" id="playlistList">
-          <div class="empty-state">NO HAY ARCHIVOS CARGADOS<br><small>IMPORTA AUDIO PARA INICIAR LA SEÑAL</small></div>
-        </div>
-        <label class="import-button" for="audioFiles">＋ IMPORTAR TEMAS
-          <input id="audioFiles" type="file" accept="audio/*,.mp3,.wav,.ogg,.m4a,.flac" multiple>
-        </label>
-        <p class="panel-note">Los archivos importados se reproducen desde este dispositivo.</p>
-      </aside>
-
-      <section class="player-column">
-        <div class="now-playing panel">
-          <div class="cover-frame">
-            <img id="coverArt" src="assets/predator-cover.jpg" alt="Portada industrial NEURA">
-            <div class="cover-overlay"><span>NEURA ARCHIVE</span><b>08</b></div>
-          </div>
-          <div class="track-info">
-            <div class="eyebrow red">/// TRANSMISIÓN ACTIVA</div>
-            <h2 id="trackTitle">INDUSTRIAS OLVIDADAS</h2>
-            <p class="artist" id="trackArtist">NEURA // 888 DIGITAL FACTORY</p>
-            <div class="metadata">
-              <span>ÁLBUM <b id="trackAlbum">DEPREDADOR</b></span>
-              <span>GÉNERO <b>INDUSTRIAL / CYBERPUNK</b></span>
-              <span>ESTADO <b class="red-text" id="playState">EN ESPERA</b></span>
-            </div>
-            <p class="track-description">Entre ruinas y concreto,<br>las máquinas aún recuerdan.<br>La humanidad fue un error…<br>la música, una señal.</p>
-            <div class="progress-wrap">
-              <input id="seekBar" type="range" min="0" max="1000" value="0" aria-label="Posición de reproducción">
-              <div class="time-row"><span id="currentTime">00:00</span><span id="duration">00:00</span></div>
-            </div>
-          </div>
-        </div>
-
-        <div class="visualizer-panel panel">
-          <div class="viz-title"><span>ANALIZADOR DE FRECUENCIA</span><span class="red-text">FFT // LIVE</span></div>
-          <div class="bars" id="visualizer" aria-hidden="true"></div>
-          <div class="viz-footer"><span>LOW ◀</span><span>FREQUENCY RESPONSE</span><span>▶ HIGH</span></div>
-        </div>
-
-        <div class="controls panel">
-          <button id="shuffleButton" class="icon-button" aria-label="Orden aleatorio" title="Aleatorio">⤨</button>
-          <button id="previousButton" class="icon-button" aria-label="Tema anterior" title="Anterior">|◀</button>
-          <button id="playButton" class="play-button" aria-label="Reproducir">▶</button>
-          <button id="nextButton" class="icon-button" aria-label="Tema siguiente" title="Siguiente">▶|</button>
-          <button id="repeatButton" class="icon-button" aria-label="Repetir" title="Repetir">↻</button>
-          <div class="volume-control"><span>VOL</span><input id="volumeBar" type="range" min="0" max="1" step="0.01" value="0.8" aria-label="Volumen"></div>
-        </div>
-      </section>
-
-      <aside class="panel telemetry-panel" id="sistema">
-        <div class="panel-heading"><div><span class="heading-icon">⌁</span> TELEMETRÍA</div><span class="red-text">LIVE</span></div>
-        <div class="telemetry-radar"><div class="radar"><i></i><b></b></div><div class="telemetry-numbers"><span>BPM <b id="bpm">128</b></span><span>SEÑAL <b>ESTABLE</b></span><span>INTENSIDAD <b id="intensity">78%</b></span><span>ESTADO <b class="red-text" id="telemetryState">STANDBY</b></span></div></div>
-        <div class="telemetry-section">
-          <h3>ANÁLISIS DEL SISTEMA</h3>
-          <div class="meter"><span>CPU</span><div><i style="width:34%"></i></div><b>34%</b></div>
-          <div class="meter"><span>MEMORIA</span><div><i style="width:62%"></i></div><b>62%</b></div>
-          <div class="meter"><span>LATENCIA</span><div><i style="width:18%"></i></div><b>12 ms</b></div>
-          <div class="meter"><span>SEÑAL</span><div><i id="signalMeter" style="width:78%"></i></div><b id="signalPercent">78%</b></div>
-        </div>
-        <div class="telemetry-section system-log">
-          <h3>REGISTRO DE SISTEMA</h3>
-          <p><i class="status-light" id="audioLight"></i> REPRODUCTOR <b id="logPlayback">EN ESPERA</b></p>
-          <p><i class="status-light"></i> TERMINAL <b>ONLINE</b></p>
-          <p><i class="status-light"></i> ARCHIVOS LOCALES <b id="logTracks">00</b></p>
-          <p><i class="status-light"></i> CALIDAD <b>ORIGINAL</b></p>
-        </div>
-        <blockquote>“LA MÚSICA ES LA ÚLTIMA<br>FORMA DE RESISTENCIA.”</blockquote>
-      </aside>
-    </section>
-  </main>
-
-  <footer class="footer">
-    <div class="footer-brand"><span class="wave-mark">≋</span><span>NEURA // INDUSTRIAS OLVIDADAS<small>888 DIGITAL FACTORY</small></span></div>
-    <div class="footer-center"><span><i></i> AUDIO</span><span><i></i> VISUALIZADOR</span><span><i></i> CONEXIÓN LOCAL</span></div>
-    <div class="footer-quote">EL PASADO NO MUERE.<br><b>SOLO SE TRANSFORMA.</b></div>
-  </footer>
-
-  <audio id="audioPlayer" preload="metadata"></audio>
-  <script src="app.js"></script>
-</body>
-</html>
+  <aside class="panel telemetry" id="sistema">
+    <div class="panel-head"><div><i>⌁</i> TELEMETRÍA</div><span class="red">LIVE</span></div>
+    <div class="radar-wrap"><div class="radar"><i></i><b></b></div><div class="stats"><span>BPM <b id="bpm">128</b></span><span>TONALIDAD <b>Cm</b></span><span>INTENSIDAD <b id="intensity">78%</b></span><span>ESTADO <b class="red" id="telemetryState">STANDBY</b></span></div></div>
+    <div class="tele-section"><h4>TELEMETRÍA DEL SISTEMA</h4><div class="meter"><span>CPU</span><div><i style="width:34%"></i></div><b>34%</b></div><div class="meter"><span>MEMORIA</span><div><i style="width:62%"></i></div><b>62%</b></div><div class="meter"><span>LATENCIA</span><div><i style="width:18%"></i></div><b>12 ms</b></div><div class="meter"><span>SEÑAL</span><div><i id="signalMeter" style="width:78%"></i></div><b id="signalPercent">78%</b></div></div>
+    <div class="tele-section log"><h4>REGISTRO DE SISTEMA</h4><p><i id="audioLight" class="light"></i> REPRODUCTOR <b id="logPlayback">STANDBY</b></p><p><i class="light"></i> TERMINAL <b>ONLINE</b></p><p><i class="light"></i> ARCHIVOS <b id="logTracks">00</b></p><p><i class="light"></i> CALIDAD <b>ORIGINAL</b></p></div>
+    <blockquote>“LA MÚSICA ES LA ÚLTIMA<br>FORMA DE RESISTENCIA.”</blockquote>
+  </aside>
+</section>
+</main>
+<footer><div class="footer-brand"><span class="wave">≋</span><span>NEURA // INDUSTRIAS OLVIDADAS<small>888 DIGITAL FACTORY</small></span></div><div class="footer-status"><span>◉ AUDIO</span><span>◉ VISUALIZADOR</span><span>◉ CONEXIÓN LOCAL</span></div><div class="footer-quote">EL PASADO NO MUERE.<br><b>SOLO SE TRANSFORMA.</b></div></footer>
+<audio id="audioPlayer" preload="metadata"></audio><script src="app.js"></script>
+</body></html>
