@@ -1,28 +1,151 @@
-(() => {
-const $=id=>document.getElementById(id);
-const audio=$("audioPlayer"), input=$("audioFiles"), list=$("playlistList");
-const play=$("playButton"), seek=$("seekBar"), current=$("currentTime"), duration=$("duration");
-let tracks=[], index=-1, shuffle=false, repeat=false, objectUrls=[];
-const fmt=t=>{if(!Number.isFinite(t))return"00:00";let m=Math.floor(t/60),s=Math.floor(t%60);return String(m).padStart(2,"0")+":"+String(s).padStart(2,"0")};
-function bars(){const box=$("visualizer");for(let i=0;i<54;i++){const b=document.createElement("i");b.style.height=(7+Math.random()*35)+"px";box.appendChild(b)}}
-bars();
-function animateBars(){document.querySelectorAll(".visualizer i").forEach((b,i)=>{const playing=!audio.paused;const h=playing?(7+Math.random()*(18+Math.abs(Math.sin(Date.now()/260+i))*48)):(4+Math.random()*8);b.style.height=h+"px";b.style.opacity=playing?".95":".42"});requestAnimationFrame(()=>setTimeout(animateBars,130))}
-animateBars();
-function render(){ $("trackCount").textContent=String(tracks.length).padStart(2,"0")+" TEMAS";$("logTracks").textContent=String(tracks.length).padStart(2,"0");
-if(!tracks.length){list.innerHTML='<div class="empty">NO HAY ARCHIVOS EN MEMORIA<br><small>IMPORTA TUS TEMAS PARA ACTIVAR LA TERMINAL</small></div>';return}
-list.innerHTML="";tracks.forEach((t,i)=>{const row=document.createElement("div");row.className="track-row"+(i===index?" active":"");row.innerHTML=`<img class="track-thumb" src="assets/predator-cover.jpg" alt=""><div class="track-text"><b>${escapeHtml(t.name.replace(/\.[^.]+$/,""))}</b><small>NEURA // ARCHIVO LOCAL</small></div><time>${t.duration?fmt(t.duration):"--:--"}</time>`;row.addEventListener("click",()=>load(i,true));list.appendChild(row)})}
-function escapeHtml(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
-function load(i,autoplay=false){if(!tracks.length)return;index=(i+tracks.length)%tracks.length;audio.src=tracks[index].url;$("trackTitle").textContent=tracks[index].name.replace(/\.[^.]+$/,"").toUpperCase();$("trackArtist").textContent="NEURA // 888 DIGITAL FACTORY";$("trackAlbum").textContent="DEPREDADOR";$("playState").textContent="CARGANDO";$("telemetryState").textContent="LOADING";render();audio.load();if(autoplay)audio.play().catch(()=>{});}
-input.addEventListener("change",()=>{const files=[...input.files].filter(f=>f.type.startsWith("audio/")||/\.(mp3|wav|ogg|m4a|flac)$/i.test(f.name));if(!files.length)return;files.forEach(f=>{const url=URL.createObjectURL(f);objectUrls.push(url);tracks.push({name:f.name,url,duration:0})});render();if(index<0)load(0,false);input.value=""});
-play.addEventListener("click",()=>{if(index<0){if(!tracks.length){input.click();return}load(0)}if(audio.paused)audio.play().catch(()=>{$("playState").textContent="ERROR DE AUDIO"});else audio.pause()});
-$("previousButton").addEventListener("click",()=>load(index-1,true));$("nextButton").addEventListener("click",()=>load(shuffle?Math.floor(Math.random()*tracks.length):index+1,true));
-$("shuffleButton").addEventListener("click",e=>{shuffle=!shuffle;e.currentTarget.classList.toggle("red",shuffle)});$("repeatButton").addEventListener("click",e=>{repeat=!repeat;audio.loop=repeat;e.currentTarget.classList.toggle("red",repeat)});
-$("volumeBar").addEventListener("input",e=>audio.volume=Number(e.target.value));audio.volume=.8;
-audio.addEventListener("loadedmetadata",()=>{if(index>=0)tracks[index].duration=audio.duration;duration.textContent=fmt(audio.duration);render()});
-audio.addEventListener("timeupdate",()=>{current.textContent=fmt(audio.currentTime);if(Number.isFinite(audio.duration)&&audio.duration>0)seek.value=String(Math.round(audio.currentTime/audio.duration*1000))});
-seek.addEventListener("input",()=>{if(audio.duration)audio.currentTime=Number(seek.value)/1000*audio.duration});
-audio.addEventListener("play",()=>{play.textContent="Ⅱ";play.setAttribute("aria-label","Pausar");$("playState").textContent="REPRODUCIENDO";$("telemetryState").textContent="ACTIVO";$("logPlayback").textContent="REPRODUCIENDO";$("audioLight").style.background="#27d5b0";$("audioLight").style.boxShadow="0 0 7px #27d5b0";$("intensity").textContent="94%";$("signalMeter").style.width="94%";$("signalPercent").textContent="94%";$("bpm").textContent=String(90+Math.floor(Math.random()*65))});
-audio.addEventListener("pause",()=>{play.textContent="▶";play.setAttribute("aria-label","Reproducir");if(audio.ended)return;$("playState").textContent="PAUSADO";$("telemetryState").textContent="STANDBY";$("logPlayback").textContent="PAUSADO";$("audioLight").style.background="var(--red)";$("audioLight").style.boxShadow="0 0 7px var(--red)"});
-audio.addEventListener("ended",()=>{if(!repeat&&tracks.length)load(shuffle?Math.floor(Math.random()*tracks.length):index+1,true)});
+const audio = document.getElementById("audioPlayer");
+const playPause = document.getElementById("playPause");
+const seek = document.getElementById("seek");
+const timeLabel = document.getElementById("timeLabel");
+const currentTitle = document.getElementById("currentTitle");
+const durationLabel = document.getElementById("durationLabel");
+const audioState = document.getElementById("audioState");
+const terminalStatus = document.getElementById("terminalStatus");
+const sysPlaying = document.getElementById("sysPlaying");
+const metricState = document.getElementById("metricState");
+const trackList = document.getElementById("trackList");
+const audioFiles = document.getElementById("audioFiles");
+const importHint = document.getElementById("importHint");
+
+const tracks = [...document.querySelectorAll(".track")].map((el, i) => ({
+  title: el.querySelector(".track-meta b").textContent.replace(/^\d+\.\s*/, ""),
+  artist: el.querySelector(".track-meta small").textContent,
+  duration: el.querySelector("time").textContent,
+  src: null, element: el, sample: true
+}));
+let current = 0, isPlaying = false, shuffle = false, repeat = false, objectUrls = [];
+
+function makeBars(container, count, eq=false) {
+  container.innerHTML = "";
+  for (let i=0;i<count;i++) {
+    const bar=document.createElement("span");
+    const h=eq ? 15+Math.random()*85 : 15+Math.abs(Math.sin(i*.55))*70+Math.random()*24;
+    bar.style.height=`${Math.min(100,h)}%`;
+    container.appendChild(bar);
+  }
+}
+makeBars(document.getElementById("waveform"), 66);
+makeBars(document.getElementById("equalizer"), 38, true);
+setInterval(()=>{
+  document.querySelectorAll("#equalizer span").forEach(b=>b.style.height=`${10+Math.random()*85}%`);
+  if(isPlaying) document.getElementById("intensity").textContent=`${65+Math.floor(Math.random()*30)}%`;
+},220);
+
+function fmt(seconds) {
+  if (!Number.isFinite(seconds)) return "00:00";
+  return `${String(Math.floor(seconds/60)).padStart(2,"0")}:${String(Math.floor(seconds%60)).padStart(2,"0")}`;
+}
+function setState(playing) {
+  isPlaying=playing;
+  playPause.textContent=playing ? "Ⅱ" : "▶";
+  playPause.setAttribute("aria-label",playing ? "Pausar" : "Reproducir");
+  audioState.textContent=playing ? "SEÑAL EN REPRODUCCIÓN" : "SEÑAL EN ESPERA";
+  terminalStatus.textContent=playing ? "REPRODUCIENDO..." : "SISTEMA PREPARADO...";
+  sysPlaying.textContent=playing ? "●" : "—";
+  metricState.textContent=playing ? "ACTIVO" : "STANDBY";
+}
+function renderTrack() {
+  tracks.forEach((t,i)=>t.element.classList.toggle("active",i===current));
+  currentTitle.textContent=tracks[current].title;
+  durationLabel.textContent=tracks[current].duration;
+  document.getElementById("trackCount").textContent=`${tracks.length} TEMAS`;
+  if(tracks[current].src) {
+    audio.src=tracks[current].src;
+    audio.load();
+  } else {
+    audio.removeAttribute("src");
+    audio.load();
+  }
+  seek.value=0;
+  timeLabel.textContent=`00:00 / ${tracks[current].duration}`;
+  document.querySelectorAll("#waveform span").forEach((b,i)=>b.classList.toggle("played",i<3));
+  setState(false);
+}
+function selectTrack(index, autoplay=false) {
+  current=(index+tracks.length)%tracks.length;
+  renderTrack();
+  if(autoplay) playCurrent();
+}
+async function playCurrent() {
+  const t=tracks[current];
+  if(!t || !t.src) {
+    setState(false);
+    audioState.textContent="IMPORTA UN ARCHIVO PARA ESCUCHAR";
+    terminalStatus.textContent="ESPERANDO ARCHIVO DE AUDIO";
+    importHint.textContent="Selecciona uno o más archivos para activar la reproducción.";
+    document.querySelector(".import-button").scrollIntoView({behavior:"smooth",block:"nearest"});
+    return;
+  }
+  try { await audio.play(); setState(true); }
+  catch(e) { setState(false); audioState.textContent="NO SE PUDO INICIAR EL AUDIO"; }
+}
+trackList.addEventListener("click", e=>{
+  const btn=e.target.closest(".track");
+  if(btn) selectTrack(Number(btn.dataset.index), true);
+});
+playPause.addEventListener("click",()=>{
+  if(isPlaying) { audio.pause(); setState(false); }
+  else playCurrent();
+});
+document.getElementById("next").addEventListener("click",()=>selectTrack(shuffle?Math.floor(Math.random()*tracks.length):current+1,true));
+document.getElementById("prev").addEventListener("click",()=>{
+  if(audio.currentTime>3 && tracks[current].src) audio.currentTime=0;
+  else selectTrack(current-1,true);
+});
+document.getElementById("shuffle").addEventListener("click",e=>{
+  shuffle=!shuffle;e.currentTarget.classList.toggle("selected",shuffle);
+  e.currentTarget.style.color=shuffle?"var(--red)":"";
+  audioState.textContent=shuffle?"MODO ALEATORIO ACTIVADO":"MODO NORMAL";
+});
+document.getElementById("repeat").addEventListener("click",e=>{
+  repeat=!repeat;audio.loop=repeat;e.currentTarget.style.color=repeat?"var(--red)":"";
+});
+audio.addEventListener("play",()=>setState(true));
+audio.addEventListener("pause",()=>setState(false));
+audio.addEventListener("loadedmetadata",()=>{
+  if(Number.isFinite(audio.duration)) {
+    tracks[current].duration=fmt(audio.duration);
+    durationLabel.textContent=tracks[current].duration;
+    timeLabel.textContent=`${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+  }
+});
+audio.addEventListener("timeupdate",()=>{
+  if(!Number.isFinite(audio.duration)||audio.duration<=0)return;
+  seek.value=(audio.currentTime/audio.duration)*100;
+  timeLabel.textContent=`${fmt(audio.currentTime)} / ${fmt(audio.duration)}`;
+  const n=Math.floor((audio.currentTime/audio.duration)*66);
+  document.querySelectorAll("#waveform span").forEach((b,i)=>b.classList.toggle("played",i<n));
+});
+audio.addEventListener("ended",()=>{if(!repeat)selectTrack(shuffle?Math.floor(Math.random()*tracks.length):current+1,true)});
+seek.addEventListener("input",()=>{
+  if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=(Number(seek.value)/100)*audio.duration;
+});
+audioFiles.addEventListener("change",()=>{
+  const files=[...audioFiles.files].filter(f=>f.type.startsWith("audio/")||/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(f.name));
+  if(!files.length){importHint.textContent="No se detectaron archivos de audio compatibles.";return;}
+  objectUrls.forEach(URL.revokeObjectURL);objectUrls=[];
+  tracks.forEach(t=>t.element.remove());
+  tracks.length=0;
+  files.forEach((file,i)=>{
+    const url=URL.createObjectURL(file);objectUrls.push(url);
+    const title=file.name.replace(/\.[^.]+$/,"").replace(/[_-]+/g," ").toUpperCase();
+    const el=document.createElement("button");el.className="track";el.dataset.index=i;
+    el.innerHTML=`<span class="track-cover cover${(i%12)+1}">♫</span><span class="track-meta"><b>${String(i+1).padStart(2,"0")}. ${escapeHTML(title)}</b><small>ARCHIVO LOCAL</small></span><time>--:--</time>`;
+    trackList.appendChild(el);
+    tracks.push({title,artist:"ARCHIVO LOCAL",duration:"--:--",src:url,element:el,sample:false});
+  });
+  importHint.textContent=`${files.length} archivo(s) cargado(s) · audio local en este dispositivo`;
+  selectTrack(0,false);
+  playCurrent();
+});
+function escapeHTML(s){return s.replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));}
+document.querySelectorAll(".nav a").forEach(a=>a.addEventListener("click",()=>{
+  document.querySelectorAll(".nav a").forEach(x=>x.classList.remove("active"));a.classList.add("active");
+}));
 window.addEventListener("beforeunload",()=>objectUrls.forEach(URL.revokeObjectURL));
-})();
+setState(false);
